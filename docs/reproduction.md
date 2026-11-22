@@ -4,10 +4,13 @@ Run commands from the repository root. Julia dependencies are pinned by `Project
 
 ## Environment
 
+See [Environment setup](../README.md#environment-setup) for prerequisites and the roles of the Julia and Python environment files. With Juliaup installed, the complete setup is:
+
 ```bash
+juliaup add 1.12.5
 python3 -m venv .venv
 . .venv/bin/activate
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 julia +1.12.5 --project=. -e 'using Pkg; Pkg.instantiate()'
 ```
 
