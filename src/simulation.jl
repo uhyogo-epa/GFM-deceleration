@@ -7,7 +7,7 @@ function solvepart(y,s,a,b;strict=false,step=.02)
 end
 
 function run_case(row;strict=false,horizon=nothing,save=true,output=joinpath(ROOT,"outputs/runs"))
- c=load_config(joinpath(ROOT,"inputs",row["config"]),row)
+ c=load_config(joinpath(ROOT,"studies/paper/inputs",row["config"]),row)
  tag=row["case"]*(strict ? "_strict" : "");dir=joinpath(output,tag)
  h=horizon===nothing ? parse(Float64,row["horizon"]) : horizon
  prepare_output(dir,row;kind="case",options=Dict("strict"=>strict,"horizon"=>h))

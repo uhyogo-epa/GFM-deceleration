@@ -16,7 +16,7 @@ def register_export(folder,row,cfg):
         original=tomllib.loads(source.read_text())
         data={k:original[k] for k in ['case','inputs','code','config_text','study_text']}
     else:
-        c=catalog();data=dict(case=row,inputs=c['inputs'],code=c['code'],config_text=c['snapshots']['inputs/'+row['config']],study_text=c['snapshots']['inputs/study.toml'])
+        c=catalog();data=dict(case=row,inputs=c['inputs'],code=c['code'],config_text=c['snapshots']['studies/paper/inputs/'+row['config']],study_text=c['snapshots']['studies/paper/inputs/study.toml'])
     from toml_writer import dumps
     (folder/'run_record.toml').write_text(dumps(data))
 def network(stage,cfg):
@@ -87,9 +87,9 @@ def comparison_views(draw=True):
             name=f'{case}_pre_equilibrium' if prefault else f'{case}_post_{POST_TIME:g}s'
             title=f'Case {case}: pre-fault equilibrium (t = {expected_absolute:.2f} s)' if prefault else f'Case {case}: {POST_TIME:.2f} s after fault clearing'
             meta['snapshot']=name
-            figure=ROOT/'figures/details/power_flow'/name
+            figure=ROOT/'studies/paper/figures/details/power_flow'/name
             if draw:save(draw_single_line(buses,lines,meta,summary,title=title),figure)
-            records.append(dict(case=case,stage=stage,time_absolute_s=expected_absolute,time_post_clearing_s=float(row.t_post_s),state_kind='equilibrium' if prefault else 'saved dynamic snapshot',control_conditions=meta['control_conditions'],source_data=str(folder.relative_to(ROOT)),source_observations=f'results/{case}/observations.csv.gz',PNG=str(figure.with_suffix('.png').relative_to(ROOT)),PDF=str(figure.with_suffix('.pdf').relative_to(ROOT))))
+            records.append(dict(case=case,stage=stage,time_absolute_s=expected_absolute,time_post_clearing_s=float(row.t_post_s),state_kind='equilibrium' if prefault else 'saved dynamic snapshot',control_conditions=meta['control_conditions'],source_data=str(folder.relative_to(ROOT)),source_observations=f'studies/paper/results/{case}/observations.csv.gz',PNG=str(figure.with_suffix('.png').relative_to(ROOT)),PDF=str(figure.with_suffix('.pdf').relative_to(ROOT))))
             checks.append(dict(case=case,stage=stage,max_saved_observation_error_pu=float(max(errors)),max_nodal_power_error_pu=summary['max_nodal_power_error_pu'],P_balance_error_pu=summary['P_balance_error_pu'],Q_balance_error_pu=qerror,opened_line_status={str(i):bool(lines.loc[i,'active']) for i in study()['network']['opened_lines']}))
     return records,dict(post_clearing_time_s=POST_TIME,figure_count=len(records),prefault_data_shared=True,all_passed=True,checks=checks)
 
@@ -97,9 +97,9 @@ def draw_all_flows():
     for folder in sorted((RESULTS/'power_flow').iterdir()):
         if not folder.is_dir() or not (folder/'metadata.csv').exists():continue
         values=load_snapshot(folder)
-        save(draw_single_line(*values,title=folder.name.replace('_',' ')),ROOT/'figures/details/power_flow'/folder.name)
+        save(draw_single_line(*values,title=folder.name.replace('_',' ')),ROOT/'studies/paper/figures/details/power_flow'/folder.name)
         if folder.name=='common_post_equilibrium':
-            save(draw_single_line(*values,schematic=True,title='Shared eight-bus four-GFM system'),ROOT/'figures/paper/system')
+            save(draw_single_line(*values,schematic=True,title='Shared eight-bus four-GFM system'),ROOT/'studies/paper/figures/paper/system')
     comparison_views()
 
 def export_flows():

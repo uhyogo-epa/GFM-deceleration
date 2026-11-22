@@ -1,11 +1,11 @@
 function findroots(row;output=joinpath(ROOT,"outputs/local_basins"))
- c=load_config(joinpath(ROOT,"inputs",row["config"]),row);s=make_stage(c,"post")
+ c=load_config(joinpath(ROOT,"studies/paper/inputs",row["config"]),row);s=make_stage(c,"post")
  verify_reference(joinpath(result_root(),row["case"]) )
  target=vec(readdlm(joinpath(result_root(),row["case"],"post_root.csv"),',',Float64));theta=sum(target[[26,39,52]])/3
  dir=joinpath(output,row["case"]);mkpath(dir)
- prepare_output(dir,row;kind="local_section",section="inputs/local_basin.toml",resume=true)
+ prepare_output(dir,row;kind="local_section",section="studies/paper/inputs/local_basin.toml",resume=true)
  roots=[target];records=[]
- for shift in TOML.parsefile(joinpath(ROOT,"inputs/local_basin.toml"))["root_seed_shifts_rad"]
+ for shift in TOML.parsefile(joinpath(ROOT,"studies/paper/inputs/local_basin.toml"))["root_seed_shifts_rad"]
   seed=section(target,s,theta+shift,0.);x,er=equilibrium(seed,s)
   er<1e-8 || continue
   if all(maximum(abs.(x-r))>1e-4 for r in roots)
@@ -22,7 +22,7 @@ function findroots(row;output=joinpath(ROOT,"outputs/local_basins"))
  println("ROOTS ",row["case"]," ",records);flush(stdout)
  (;row,c,s,target,dir,theta)
 end
-function basinpoint(context,id,theta,df;horizon=TOML.parsefile(joinpath(ROOT,"inputs/local_basin.toml"))["horizon_s"])
+function basinpoint(context,id,theta,df;horizon=TOML.parsefile(joinpath(ROOT,"studies/paper/inputs/local_basin.toml"))["horizon_s"])
  (;row,c,s,target,dir)=context
  path=joinpath(dir,"points",lpad(id,3,'0')*".toml");isfile(path)&&return
  y=section(target,s,theta,df);actual,freq=coordinates(y,s);u0=voltages(y,s)
@@ -30,7 +30,7 @@ function basinpoint(context,id,theta,df;horizon=TOML.parsefile(joinpath(ROOT,"in
  for j in 1:4;inj[BUS[j]]=complex(y[13(j-1)+4],y[13(j-1)+3]);end
  alg=maximum(abs.((s.Y*u0-inj)[GFMModel.NONSLACK]))
  @assert abs(actual-theta)<1e-10 && abs(freq-df)<1e-10 && alg<1e-10
- tick=time();sol=solvepart(y,s,0.,horizon;step=TOML.parsefile(joinpath(ROOT,"inputs/local_basin.toml"))["save_s"])
+ tick=time();sol=solvepart(y,s,0.,horizon;step=TOML.parsefile(joinpath(ROOT,"studies/paper/inputs/local_basin.toml"))["save_s"])
  success=string(sol.retcode)=="Success"
  machines=classify(sol.t,sol.u,s,target)
  labels=[m[2] for m in machines]
@@ -38,7 +38,7 @@ function basinpoint(context,id,theta,df;horizon=TOML.parsefile(joinpath(ROOT,"in
  result=Dict("point"=>id,"theta_requested"=>theta,"df_requested"=>df,"theta_actual"=>actual,"df_actual"=>freq,"initial_algebraic_residual"=>alg,"classification"=>label,"machine_labels"=>labels,"retcode"=>string(sol.retcode),"horizon_s"=>sol.t[end],"runtime_s"=>time()-tick,"initial_native"=>y,"initial_bus_voltage_ri"=>[[real(v),imag(v)] for v in u0],"final_native"=>sol.u[end],"final_bus_voltage_ri"=>[[real(v),imag(v)] for v in voltages(sol.u[end],s)],"machine_metrics"=>[collect(string.(m)) for m in machines])
  open(path,"w") do io;TOML.print(io,result);end
  # Keep one full representative per row and the stable-column points, with no averaging of machines.
- settings=TOML.parsefile(joinpath(ROOT,"inputs/local_basin.toml"))
+ settings=TOML.parsefile(joinpath(ROOT,"studies/paper/inputs/local_basin.toml"))
  if id%settings["representative_modulus"]==settings["representative_remainder"] || id in settings["representative_ids"]
   trajectory=joinpath(dir,"points",lpad(id,3,'0')*"_trajectory.csv")
   writecsv(trajectory,vcat(["t_s"],["x$i" for i in eachindex(y)]),[vcat(t,x) for (t,x) in zip(sol.t,sol.u)])
@@ -47,11 +47,11 @@ function basinpoint(context,id,theta,df;horizon=TOML.parsefile(joinpath(ROOT,"in
  println("BASIN_DONE ",row["case"]," ",id," ",label," ",round(time()-tick;digits=2),"s");flush(stdout)
 end
 function frozen_context(row;output=joinpath(ROOT,"outputs/fault_basins"))
-    c=load_config(joinpath(ROOT,"inputs",row["config"]),row);s=make_stage(c,"post")
+    c=load_config(joinpath(ROOT,"studies/paper/inputs",row["config"]),row);s=make_stage(c,"post")
     verify_reference(joinpath(result_root(),row["case"]) )
     target=vec(readdlm(joinpath(result_root(),row["case"],"post_root.csv"),',',Float64))
     dir=joinpath(output,row["case"])
-    prepare_output(dir,row;kind="frozen_section",section="inputs/fault_basin.toml",resume=true)
+    prepare_output(dir,row;kind="frozen_section",section="studies/paper/inputs/fault_basin.toml",resume=true)
     mkpath(joinpath(dir,"points"))
     (;row,c,s,target,dir)
 end

@@ -1,0 +1,16 @@
+"baseline_fixture_max_rhs_error" = 4.255533334890914e-12
+"baseline_commit" = "0d316b3a664fe7f0baf3c9a385a50ee20a4a49b8"
+"rhs_and_voltages_bitwise_equal_between_layouts" = true
+"samples" = 36
+"baseline_fixture_max_voltage_error" = 3.3422138886441676e-16
+"physical_and_numerical_input_values_unchanged" = true
+"third_party_license_byte_identical" = true
+"saved_waveform_comparisons_passed" = 230
+"equation_checks_passed" = true
+"strict_fixture_check" = "check_refactor.jl fails its exact-zero fixture assertion on both the baseline and reorganized tree in this environment. The 36 before/after RHS and voltage comparisons are bitwise identical; the stored fixture deviations are reported above. The original assertion has not been relaxed."
+
+["byte_identical_saved_files"]
+"results" = 326
+"figures" = 62
+"provenance" = 27
+"inputs" = 5

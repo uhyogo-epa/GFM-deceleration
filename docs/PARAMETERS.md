@@ -1,6 +1,6 @@
 # Complete common parameter definitions
 
-Canonical inputs are [common.toml](../inputs/common.toml) and [cases.csv](../inputs/cases.csv). Only the case-level outer-control settings differ between the main cases. The quantities below use the shared model per-unit bases.
+Canonical inputs are [common.toml](../studies/paper/inputs/common.toml) and [cases.csv](../studies/paper/inputs/cases.csv). Only the case-level outer-control settings differ between the main cases. The quantities below use the shared model per-unit bases.
 
 ## Network
 
@@ -76,7 +76,7 @@ V_{I,dq}=-F_{I,c}L_fW I_{f,dq}+K_{PI}(I^*_{f,dq}-I_{f,dq})+K_{II}\gamma_I+F_I V_
 
 Voltage PI gains have units pu current/pu voltage and pu current/(pu voltage·s). Current PI gains have units pu voltage/pu current and pu voltage/(pu current·s). Integrator states retain the corresponding error×seconds units. Feedforward and cross-coupling flags are all 1. No extra anti-windup loop or instantaneous actual-current clamp has been added.
 
-The Droop and VSM outer equations are in the [README](../README.md#control-models-and-cases). `mp` has units pu frequency/pu power; Kp=ω0 mp is the equivalent dimensional P–f gain in (rad/s)/pu power. H is in seconds; D=1/mp, D1 and D2 are pu power/pu frequency. The washout pole ωD is in s⁻¹, with a 0.02 s time constant in C. H is not a Droop input. τp is not an independent VSM measurement-filter time constant.
+The Droop and VSM outer equations are in the [model guide](model.md#outer-control-equations). `mp` has units pu frequency/pu power; Kp=ω0 mp is the equivalent dimensional P–f gain in (rad/s)/pu power. H is in seconds; D=1/mp, D1 and D2 are pu power/pu frequency. The washout pole ωD is in s⁻¹, with a 0.02 s time constant in C. H is not a Droop input. τp is not an independent VSM measurement-filter time constant.
 
 The equations use one common model power base. Physical MVA/kV ratings are not inferred. In particular, a P command is not the device rating. The stated H and droop are on this model base.
 
@@ -97,7 +97,7 @@ Each inverter contributes 13 states, in Bus1, Bus2, Bus3, Bus7 order. The CSV fi
 
 For VSM only, x53…x56 are washout z for Bus1/2/3/7, in pu frequency. `states.csv.gz` stores every differential state. The seven non-slack complex bus voltages are algebraic functions of Ig and the stage network. The slack is fixed. Section files retain the complete initial/final native vectors and all eight reconstructed complex bus voltages.
 
-The [legacy 66-state ordering](../provenance/legacy_states.csv) is provided only for source comparison. In legacy-coordinate VSM reference files, the old Pf slot is an auxiliary P*−ν/mp coordinate. This does not mean a P-filter state exists in the VSM integrator.
+The [legacy 66-state ordering](../studies/paper/provenance/legacy_states.csv) is provided only for source comparison. In legacy-coordinate VSM reference files, the old Pf slot is an auxiliary P*−ν/mp coordinate. This does not mean a P-filter state exists in the VSM integrator.
 
 ## Observations
 

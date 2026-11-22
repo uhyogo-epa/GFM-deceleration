@@ -5,5 +5,5 @@ __pycache__/
 .julia/
 .venv/
 .cache/
-results/*_strict/states.csv.gz
-results/original_*/states.csv.gz
+studies/paper/results/*_strict/states.csv.gz
+studies/paper/results/original_*/states.csv.gz

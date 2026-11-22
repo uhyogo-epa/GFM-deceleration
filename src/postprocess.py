@@ -11,11 +11,11 @@ ROOT=Path(__file__).resolve().parents[1]
 _verified=set();_used=set();_catalog=None
 def option(name,default):
     return Path(sys.argv[sys.argv.index(name)+1]).resolve() if name in sys.argv else Path(default)
-RESULTS=option('--results',ROOT/'results')
+RESULTS=option('--results',ROOT/'studies/paper/results')
 def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 def catalog():
     global _catalog
-    if _catalog is None:_catalog=tomllib.loads((ROOT/'provenance/reproduction.toml').read_text())
+    if _catalog is None:_catalog=tomllib.loads((ROOT/'studies/paper/provenance/reproduction.toml').read_text())
     return _catalog
 def assert_hashes(hashes,kind):
     for path,expected in hashes.items():
@@ -39,18 +39,18 @@ def verify(folder):
     return folder
 def case_info(tag):
     folder=verify(RESULTS/tag)
-    if RESULTS==ROOT/'results':
-        row=catalog()['cases'][tag];physical=tomllib.loads(catalog()['snapshots']['inputs/'+row['config']])
+    if RESULTS==ROOT/'studies/paper/results':
+        row=catalog()['cases'][tag];physical=tomllib.loads(catalog()['snapshots']['studies/paper/inputs/'+row['config']])
         return dict(row),physical
     record=tomllib.loads((folder/'run_record.toml').read_text())
     return record['case'],tomllib.loads(record['config_text'])
 def study():
-    if RESULTS!=ROOT/'results':
+    if RESULTS!=ROOT/'studies/paper/results':
         records=sorted(RESULTS.glob('*/run_record.toml'))
         if not records:raise RuntimeError(f'No run settings in {RESULTS}')
         result=tomllib.loads(tomllib.loads(records[0].read_text())['study_text'])
-    else:result=tomllib.loads(catalog()['snapshots']['inputs/study.toml'])
-    result['figures']=tomllib.loads((ROOT/'inputs/figures.toml').read_text())
+    else:result=tomllib.loads(catalog()['snapshots']['studies/paper/inputs/study.toml'])
+    result['figures']=tomllib.loads((ROOT/'studies/paper/inputs/figures.toml').read_text())
     return result
 def section_settings(local=False):
     flag='--local-results' if local else '--section-results'
@@ -60,7 +60,7 @@ def section_settings(local=False):
         verify(records[0].parent)
         return tomllib.loads(tomllib.loads(records[0].read_text())['section_text'])
     verify_identity()
-    return tomllib.loads(catalog()['snapshots']['inputs/local_basin.toml' if local else 'inputs/fault_basin.toml'])
+    return tomllib.loads(catalog()['snapshots']['studies/paper/inputs/local_basin.toml' if local else 'studies/paper/inputs/fault_basin.toml'])
 def main_cases():return study()['cases']['main']
 BUS=lambda:study()['network']['gfm_buses']
 REMOTE=lambda:study()['network']['remote_buses']
@@ -84,11 +84,11 @@ def native_coordinates(frame,case):
     return angle,freq
 def safe_output(path):
     path=Path(path).resolve()
-    if any(path.is_relative_to(ROOT/p) for p in ['results','figures','provenance']):
-        raise RuntimeError(f'Reference directory is read-only: {path}. Choose --output outside results/, figures/, provenance/.')
+    if any(path.is_relative_to(ROOT/p) for p in ['studies/paper/results','studies/paper/figures','studies/paper/provenance']):
+        raise RuntimeError(f'Reference directory is read-only: {path}. Choose --output outside studies/paper/results/, studies/paper/figures/, studies/paper/provenance/.')
     path.parent.mkdir(parents=True,exist_ok=True);return path
 def figure_path(path):
-    relative=Path(path).relative_to(ROOT/'figures')
+    relative=Path(path).relative_to(ROOT/'studies/paper/figures')
     return safe_output(option('--output',ROOT/'outputs/figures')/relative)
 def write_check(name,value):
     path=safe_output(option('--output',ROOT/'outputs/checks')/name)
@@ -97,5 +97,5 @@ def save_figure(fig,path):
     import matplotlib.pyplot as plt
     path=figure_path(path)
     for ext in ['png','pdf']:fig.savefig(path.with_suffix('.'+ext),dpi=240,bbox_inches='tight',facecolor='white')
-    sources=dict(datasets=sorted(_used),input_hashes=catalog()['inputs'],presentation_hash=sha(ROOT/'inputs/figures.toml'),plot_code={str(p.relative_to(ROOT)):sha(p) for p in sorted([*(ROOT/'scripts').glob('*.py'),*(ROOT/'src').glob('*.py')])},axes=[dict(xlabel=a.get_xlabel(),ylabel=a.get_ylabel(),xlim=list(a.get_xlim()),ylim=list(a.get_ylim()),title=a.get_title()) for a in fig.axes])
+    sources=dict(datasets=sorted(_used),input_hashes=catalog()['inputs'],presentation_hash=sha(ROOT/'studies/paper/inputs/figures.toml'),plot_code={str(p.relative_to(ROOT)):sha(p) for p in sorted([*(ROOT/'studies/paper/scripts').glob('*.py'),*(ROOT/'src').glob('*.py')])},axes=[dict(xlabel=a.get_xlabel(),ylabel=a.get_ylabel(),xlim=list(a.get_xlim()),ylim=list(a.get_ylim()),title=a.get_title()) for a in fig.axes])
     path.with_suffix('.sources.json').write_text(json.dumps(sources,indent=2)+'\n');plt.close(fig)

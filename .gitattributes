@@ -7,5 +7,5 @@
 *.csv.gz binary
 *.png binary
 *.pdf binary
-/provenance/reference_results/*.csv -text whitespace=cr-at-eol
-LICENSES/PowerDynamics.txt conflict-marker-size=64
+/studies/paper/provenance/reference_results/*.csv -text whitespace=cr-at-eol
+docs/licenses/PowerDynamics.txt conflict-marker-size=64

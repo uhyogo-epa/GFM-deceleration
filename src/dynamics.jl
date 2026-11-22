@@ -1,3 +1,5 @@
+# Electrical and inner PI equations derived from PowerDynamics.jl 4.4.0.
+# Copyright and license notices: docs/licenses/PowerDynamics.txt; scope: docs/third-party.md.
 function machine(y,s,j)
     c=s.config;m=c.machines[j];k=13(j-1)
     δ=y[k+13];cs=cos(δ);sn=sin(δ)
