@@ -17,10 +17,10 @@ This repository is being aligned with the manuscript. The existing calculations 
 | Location | Contents |
 |---|---|
 | [src](src/) | Shared model, integration, analysis, and plotting implementation |
-| [studies/paper](studies/paper/) | Paper study: settings, executable scripts, saved results, and figures |
+| [studies](studies/) | Paper study: settings, executable scripts, saved results, and figures |
 | [docs](docs/) | Model explanation, numerical verification, and reproducibility guidance |
 
-New calculations and plots go into `outputs/` (ignored by Git); saved study data remain read-only.
+New calculations and plots go into `studies/outputs/` (ignored by Git); saved study data remain read-only.
 
 ## Quick start
 
@@ -30,16 +30,16 @@ From the repository root, with Python 3.11+ and Julia 1.12.5 installed:
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
-python studies/paper/scripts/plot.py --only time
+python studies/scripts/plot.py --only time
 ```
 
-This redraws saved time responses into `outputs/figures/paper/`; it does not run a simulation.
+This redraws saved time responses into `studies/outputs/figures/paper/`; it does not run a simulation.
 
 To instantiate Julia dependencies and compute case C:
 
 ```bash
 julia +1.12.5 --project=. -e 'using Pkg; Pkg.instantiate()'
-OPENBLAS_NUM_THREADS=1 julia +1.12.5 --project=. studies/paper/scripts/run.jl cases.csv C
+OPENBLAS_NUM_THREADS=1 julia +1.12.5 --project=. studies/scripts/run.jl cases.csv C
 ```
 
-See the [reproduction guide](docs/reproduction.md) for phase-plane calculations and validation. Citation metadata are in [CITATION.cff](CITATION.cff). Third-party component scope and license notices are in [third-party components](docs/third-party.md).
+See the [reproduction guide](docs/reproduction.md) for phase-plane calculations and validation. Third-party component scope and license notices are in [third-party components](docs/third-party.md).

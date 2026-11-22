@@ -1,5 +1,5 @@
 """Single-line renderer for the shared eight-bus network; geometry derived from the VSM source.
-Power data are exported by studies/paper/scripts/power_flow.py from saved states.
+Power data are exported by studies/scripts/power_flow.py from saved states.
 """
 from __future__ import annotations
 import argparse
@@ -178,15 +178,15 @@ def draw_single_line(buses,lines,meta,summary,*,schematic=False,flow='both',digi
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--input',type=Path,default=ROOT/'studies/paper/results/power_flow/common_pre_equilibrium',help='Exported voltages.csv / branches.csv / metadata.csv directory')
-    parser.add_argument('--output',type=Path,default=ROOT/'outputs/figures',help='Output directory; reference figures are not overwritten')
+    parser.add_argument('--input',type=Path,default=ROOT/'studies/results/power_flow/common_pre_equilibrium',help='Exported voltages.csv / branches.csv / metadata.csv directory')
+    parser.add_argument('--output',type=Path,default=ROOT/'studies/outputs/figures',help='Output directory; reference figures are not overwritten')
     parser.add_argument('--schematic-only',action='store_true',help='Draw only circuit symbols and labels')
     parser.add_argument('--flow',choices=['both','p','q','none'],default='both')
     parser.add_argument('--digits',type=int,choices=range(2,7),default=3)
     parser.add_argument('--title')
     args=parser.parse_args();b,l,m,total=load_snapshot(args.input)
     fig=draw_single_line(b,l,m,total,schematic=args.schematic_only,flow=args.flow,digits=args.digits,title=args.title)
-    save_figure(fig,ROOT/'studies/paper/figures/details/power_flow'/args.input.name)
+    save_figure(fig,ROOT/'studies/figures/details/power_flow'/args.input.name)
     print('Created figure from',args.input)
 
 if __name__=='__main__':main()

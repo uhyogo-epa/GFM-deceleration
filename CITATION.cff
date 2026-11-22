@@ -1,7 +1,0 @@
-cff-version: 1.2.0
-message: "Please cite this repository and the exact commit used for the simulations."
-title: "GFM Deceleration: Paper Implementation"
-authors:
-  - family-names: "hashima0205"
-repository-code: "https://github.com/uhyogo-epa/GFM-deceleration"
-abstract: "A common eight-bus simulation environment reproducing recovery and finite-time negative rotation with explicit Droop and VSM control, with audited source migration, conditional classification maps and publication figures."

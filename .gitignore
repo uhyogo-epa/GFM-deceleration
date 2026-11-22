@@ -1,9 +1,9 @@
 .work/
-outputs/
+studies/outputs/
 __pycache__/
 *.pyc
 .julia/
 .venv/
 .cache/
-studies/paper/results/*_strict/states.csv.gz
-studies/paper/results/original_*/states.csv.gz
+studies/results/*_strict/states.csv.gz
+studies/results/original_*/states.csv.gz

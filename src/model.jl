@@ -3,7 +3,7 @@ using LinearAlgebra, DelimitedFiles, TOML
 export Config, Stage, rhs!, voltages, measurements, legacy_to_native, native_to_legacy,
        BUS, DYN66, ALG66, load_config, make_stage, jacobian, equilibrium, spectrum, STUDY, REMOTE, SLACK, BRANCHES, NONSLACK, stateindices, frequency_base, internal_frequency
 
-const STUDY = TOML.parsefile(joinpath(@__DIR__,"../studies/paper/inputs/study.toml"))
+const STUDY = TOML.parsefile(joinpath(@__DIR__,"../studies/inputs/study.toml"))
 const BUS = Int.(STUDY["network"]["gfm_buses"])
 const REMOTE = Int.(STUDY["network"]["remote_buses"])
 const DYN66 = vcat(collect(3:15),collect(18:30),collect(33:45),collect(54:66))

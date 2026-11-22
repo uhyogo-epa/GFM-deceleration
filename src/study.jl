@@ -3,7 +3,7 @@ include("model.jl")
 using .GFMModel, OrdinaryDiffEq, DelimitedFiles, LinearAlgebra, TOML, SHA
 using Base.Threads
 const ROOT=normpath(joinpath(@__DIR__,".."))
-const SECTION_INPUT=joinpath(ROOT,"studies/paper/inputs/fault_basin.toml")
+const SECTION_INPUT=joinpath(ROOT,"studies/inputs/fault_basin.toml")
 function readcases(file)
     lines=readlines(file);headers=split(lines[1],',')
     [Dict(String(k)=>String(v) for (k,v) in zip(headers,split(l,','))) for l in lines[2:end] if !isempty(strip(l))]
@@ -16,12 +16,12 @@ end
 compress(path)=run(`gzip -f $path`)
 filehash(path)=bytes2hex(sha256(read(path)))
 function code_identity()
-    files=vcat(sort(filter(p->endswith(p,".jl"),readdir(joinpath(ROOT,"src");join=true))),[joinpath(ROOT,p) for p in ["studies/paper/scripts/run.jl","studies/paper/scripts/basins.jl","studies/paper/scripts/fault_basins.jl","Project.toml","Manifest.toml"]])
+    files=vcat(sort(filter(p->endswith(p,".jl"),readdir(joinpath(ROOT,"src");join=true))),[joinpath(ROOT,p) for p in ["studies/scripts/run.jl","studies/scripts/basins.jl","studies/scripts/fault_basins.jl","Project.toml","Manifest.toml"]])
     Dict(relpath(p,ROOT)=>filehash(p) for p in files)
 end
 function input_identity(row;section=nothing)
     seeds=get(STUDY["seeds"],row["case"],STUDY["seeds"]["main"])
-    files=vcat(["studies/paper/inputs/study.toml","studies/paper/inputs/cases.csv","studies/paper/inputs/original_cases.csv","studies/paper/inputs/"*row["config"],seeds["pre"],seeds["post"]],section===nothing ? String[] : [section])
+    files=vcat(["studies/inputs/study.toml","studies/inputs/cases.csv","studies/inputs/original_cases.csv","studies/inputs/"*row["config"],seeds["pre"],seeds["post"]],section===nothing ? String[] : [section])
     Dict(p=>filehash(joinpath(ROOT,p)) for p in files)
 end
 function assert_hashes(hashes,label)
@@ -31,7 +31,7 @@ function assert_hashes(hashes,label)
     end
 end
 function verify_reference(folder)
-    catalog=TOML.parsefile(joinpath(ROOT,"studies/paper/provenance/reproduction.toml"))
+    catalog=TOML.parsefile(joinpath(ROOT,"studies/provenance/reproduction.toml"))
     assert_hashes(catalog["code"],"model/code")
     key=relpath(folder,ROOT)
     if haskey(catalog["datasets"],key)
@@ -45,8 +45,8 @@ function verify_reference(folder)
     record
 end
 function prepare_output(dir,row;kind,section=nothing,resume=false,options=Dict())
-    any(startswith(abspath(dir)*"/",joinpath(ROOT,p)*"/") for p in ["studies/paper/results","studies/paper/figures","studies/paper/inputs","studies/paper/provenance","src"]) && error("Reference/source directories are read-only outputs; choose --output under outputs/ or a temporary directory.")
-    record=Dict("schema"=>1,"kind"=>kind,"case"=>row,"inputs"=>input_identity(row;section),"code"=>code_identity(),"options"=>options,"config_text"=>read(joinpath(ROOT,"studies/paper/inputs",row["config"]),String),"study_text"=>read(joinpath(ROOT,"studies/paper/inputs/study.toml"),String))
+    any(startswith(abspath(dir)*"/",joinpath(ROOT,p)*"/") for p in ["studies/results","studies/figures","studies/inputs","studies/provenance","src"]) && error("Reference/source directories are read-only outputs; choose --output under studies/outputs/ or a temporary directory.")
+    record=Dict("schema"=>1,"kind"=>kind,"case"=>row,"inputs"=>input_identity(row;section),"code"=>code_identity(),"options"=>options,"config_text"=>read(joinpath(ROOT,"studies/inputs",row["config"]),String),"study_text"=>read(joinpath(ROOT,"studies/inputs/study.toml"),String))
     if section!==nothing
         target=joinpath(result_root(),row["case"],"post_root.csv")
         record["inputs"][relpath(target,ROOT)]=filehash(target)
@@ -68,10 +68,10 @@ function finish_output(dir)
 end
 function result_root()
     i=findfirst(==("--results"),ARGS)
-    i===nothing ? joinpath(ROOT,"studies/paper/results") : abspath(ARGS[i+1])
+    i===nothing ? joinpath(ROOT,"studies/results") : abspath(ARGS[i+1])
 end
 function validation_output()
-    i=findfirst(==("--output"),ARGS);dir=i===nothing ? joinpath(ROOT,"outputs/checks") : abspath(ARGS[i+1]);mkpath(dir);dir
+    i=findfirst(==("--output"),ARGS);dir=i===nothing ? joinpath(ROOT,"studies/outputs/checks") : abspath(ARGS[i+1]);mkpath(dir);dir
 end
 include("analysis.jl")
 include("simulation.jl")

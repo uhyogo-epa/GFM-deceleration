@@ -8,7 +8,7 @@ All main cases start at the same equilibrium: mean remote internal angle −0.32
 
 The Bus4 fault is applied at 1 s. Purple shows the fault-on path through 1.15 s. Removing the shunt and opening L7 at 1.15 s defines clearing and post-fault time zero. The white circle is the continuous internal-angle/frequency clearing state. Black shows the first 30 post-fault seconds. A recovers toward the stable point (mean angle −1.669678513 rad, zero frequency deviation); B/C continue in the negative-angle direction. Their 1000 s classifications are unchanged.
 
-Full saved observations are in `studies/paper/results/A,B,C/`. Plot-specific stage-labeled data are in `studies/paper/results/fault_basins/<case>/physical_fault_projection.csv`; `anchors.csv` identifies the operating, switching and equilibrium coordinates. Angles are unwrapped, with no origin subtraction. Frequency means the internal frequency deviation of Bus2/3/7. Its kinematic relation to the mean angle is checked against the model RHS.
+Full saved observations are in `studies/results/A,B,C/`. Plot-specific stage-labeled data are in `studies/results/fault_basins/<case>/physical_fault_projection.csv`; `anchors.csv` identifies the operating, switching and equilibrium coordinates. Angles are unwrapped, with no origin subtraction. Frequency means the internal frequency deviation of Bus2/3/7. Its kinematic relation to the mean angle is checked against the model RHS.
 
 ## Why the first publication looked different
 
@@ -29,7 +29,7 @@ Changing electrical states changes the high-dimensional initial-state section ev
 
 Start at each case's post-fault stable root. Uniformly shift only the three remote internal angles and set only their frequency coordinates: Pf=P*−Δf/(60mp) for Droop, ν=Δf/60 for VSM. Relative remote angles are retained. All other differential states initially remain at the root: Vc/If/Ig, dq PI integrators, Qf, Bus1 and all VSM washout states. Algebraic voltages are reconstructed with the post-fault network. **All differential states evolve after initialization.**
 
-The 43 coordinates reproduce the historical sampling positions: seven angles × five frequencies, plus four angles × two small frequency deviations. [Exact input](../studies/paper/inputs/fault_basin.toml), [integration](../studies/paper/scripts/fault_basins.jl), [checks](../studies/paper/scripts/check_fault_basins.jl), [plotting](../studies/paper/scripts/plot_fault_basins.py). Every point is newly integrated for 1000 s with the current classifier; historical labels and 30/100/300 s stopping decisions are not imported.
+The 43 coordinates reproduce the historical sampling positions: seven angles × five frequencies, plus four angles × two small frequency deviations. [Exact input](../studies/inputs/fault_basin.toml), [integration](../studies/scripts/fault_basins.jl), [checks](../studies/scripts/check_fault_basins.jl), [plotting](../studies/scripts/plot_fault_basins.py). Every point is newly integrated for 1000 s with the current classifier; historical labels and 30/100/300 s stopping decisions are not imported.
 
 Each point retains full native initial/final states, reconstructed voltages, requested/actual coordinates, per-machine labels/metrics and a saved projection trajectory. Homogeneous triangles summarize only three vertices; their interiors are not independently classified. Mixed/unresolved vertex triangles are hatched. This is not an exact boundary.
 
@@ -39,21 +39,21 @@ The actual fault path generally lies **outside the initial-state section** becau
 
 The historical D1=10 side used mp=0.10, giving nominal damping 1/mp+D1=10+10=20. Current C uses mp=0.05 and D1=0, giving 20+0=20. With H=2.5 s, D2=100, ωD=50 and the same remaining model, these yield the same VSM differential equations. A change in the names of the coefficients does not change these trajectories.
 
-All **43 C labels agree** with the historical side: 19 recover and 24 run negatively. Full native initial states agree within 1.56×10⁻¹⁵; evaluating both parameterizations at the same states gives identical RHS values. The physical trajectories agree at 1903 common saved timestamps through 30 s, with angle error below 1.5×10⁻¹¹ rad and frequency error below 5×10⁻¹² Hz. No interpolation is used for this check. [Recorded checks](../studies/paper/results/validation/basin_view_trajectory_checks.json), [historical compact initial-state reference](../studies/paper/provenance/reference_results/historical_D1_10_section.csv), [historical projected-path reference](../studies/paper/provenance/reference_results/historical_D1_10_fault_projection.csv).
+All **43 C labels agree** with the historical side: 19 recover and 24 run negatively. Full native initial states agree within 1.56×10⁻¹⁵; evaluating both parameterizations at the same states gives identical RHS values. The physical trajectories agree at 1903 common saved timestamps through 30 s, with angle error below 1.5×10⁻¹¹ rad and frequency error below 5×10⁻¹² Hz. No interpolation is used for this check. [Recorded checks](../studies/results/validation/basin_view_trajectory_checks.json), [historical compact initial-state reference](../studies/provenance/reference_results/historical_D1_10_section.csv), [historical projected-path reference](../studies/provenance/reference_results/historical_D1_10_fault_projection.csv).
 
 A's revised section has 43 recovery points; B has 13 recovery / 30 negative-running points. These are independent integrations with the A/B controllers, rather than transferred VSM labels.
 
 ## Data and provenance
 
-- Main data: [A](../studies/paper/results/fault_basins/A/), [B](../studies/paper/results/fault_basins/B/), [C](../studies/paper/results/fault_basins/C/).
-- Verification: [state/constraint checks](../studies/paper/results/validation/fault_basin_checks.toml), [coordinate/display summary](../studies/paper/results/validation/fault_basin_plot_checks.json).
-- Historical source identities and hashes: [basin_view_revision.json](../studies/paper/provenance/basin_view_revision.json).
-- Local diagnostic data remain in [studies/paper/results/basins](../studies/paper/results/basins/); see [detailed figures](DETAILS.md#phase-plane-details).
+- Main data: [A](../studies/results/fault_basins/A/), [B](../studies/results/fault_basins/B/), [C](../studies/results/fault_basins/C/).
+- Verification: [state/constraint checks](../studies/results/validation/fault_basin_checks.toml), [coordinate/display summary](../studies/results/validation/fault_basin_plot_checks.json).
+- Historical source identities and hashes: [basin_view_revision.json](../studies/provenance/basin_view_revision.json).
+- Local diagnostic data remain in [studies/results/basins](../studies/results/basins/); see [detailed figures](DETAILS.md#phase-plane-details).
 
 ```bash
-JULIA_NUM_THREADS=8 OPENBLAS_NUM_THREADS=1 julia --project=. studies/paper/scripts/fault_basins.jl
-julia --project=. studies/paper/scripts/check_fault_basins.jl
-python studies/paper/scripts/plot.py --only basins
-python studies/paper/scripts/verify_basin_views.py
-python studies/paper/scripts/plot.py --only local-basins  # Separate diagnostic section.
+JULIA_NUM_THREADS=8 OPENBLAS_NUM_THREADS=1 julia --project=. studies/scripts/fault_basins.jl
+julia --project=. studies/scripts/check_fault_basins.jl
+python studies/scripts/plot.py --only basins
+python studies/scripts/verify_basin_views.py
+python studies/scripts/plot.py --only local-basins  # Separate diagnostic section.
 ```

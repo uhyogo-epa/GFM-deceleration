@@ -21,21 +21,21 @@ Select that Julia version, or use `julia +1.12.5` for every Julia command below.
 
 ```bash
 # Individual-machine responses, section plots and local diagnostic plots.
-python studies/paper/scripts/plot.py
+python studies/scripts/plot.py
 # System diagram and all saved network-flow views.
-python studies/paper/scripts/power_flow.py
+python studies/scripts/power_flow.py
 ```
 
-Both write under `outputs/figures/`, preserving the `paper/` and `details/` subdirectories. They read committed numeric datasets and leave `studies/paper/results/` and `studies/paper/figures/` untouched. Every newly drawn figure has PNG/PDF files and a `.sources.json` sidecar listing datasets, input hashes, plotting code and axis metadata.
+Both write under `studies/outputs/figures/`, preserving the `paper/` and `details/` subdirectories. They read committed numeric datasets and leave `studies/results/` and `studies/figures/` untouched. Every newly drawn figure has PNG/PDF files and a `.sources.json` sidecar listing datasets, input hashes, plotting code and axis metadata.
 
 Choose only the figures needed:
 
 ```bash
-python studies/paper/scripts/plot.py --only time
-python studies/paper/scripts/plot.py --only basins
-python studies/paper/scripts/plot.py --only local-basins
-python studies/paper/scripts/plot_flow_comparison.py
-python studies/paper/scripts/network_figure.py --input studies/paper/results/power_flow/C_post_1s
+python studies/scripts/plot.py --only time
+python studies/scripts/plot.py --only basins
+python studies/scripts/plot.py --only local-basins
+python studies/scripts/plot_flow_comparison.py
+python studies/scripts/network_figure.py --input studies/results/power_flow/C_post_1s
 ```
 
 Use `--output /path/to/new/figures` to choose a figure output directory. The standalone network renderer takes the same directory convention. Plotting reads the result's archived settings and rejects a mismatch with the current canonical inputs or computational code. It never refreshes classification CSVs, triangles, numeric snapshots or validation reports.
@@ -44,77 +44,77 @@ Use `--output /path/to/new/figures` to choose a figure output directory. The sta
 
 ```bash
 # One main case; the complete pre/fault/post schedule is integrated.
-julia --project=. studies/paper/scripts/run.jl cases.csv C
+julia --project=. studies/scripts/run.jl cases.csv C
 # All main and additional cases in cases.csv.
-julia --project=. studies/paper/scripts/run.jl cases.csv
+julia --project=. studies/scripts/run.jl cases.csv
 # Select cases and an explicit output root.
-julia --project=. studies/paper/scripts/run.jl cases.csv A,B,C --output outputs/abc-rerun
+julia --project=. studies/scripts/run.jl cases.csv A,B,C --output studies/outputs/abc-rerun
 ```
 
-Outputs default to `outputs/runs/<case>/`. The entry point selects the controller from the case's `control` field. It preserves all differential states across events, including VSM z. Each output contains `run_record.toml`, input snapshots/hashes, code hashes, states, observations, roots, machine classifications and event/constraint checks. The record is finalized with data hashes. A nonempty existing physical-run directory is rejected; select a new output directory rather than overwriting a baseline.
+Outputs default to `studies/outputs/runs/<case>/`. The entry point selects the controller from the case's `control` field. It preserves all differential states across events, including VSM z. Each output contains `run_record.toml`, input snapshots/hashes, code hashes, states, observations, roots, machine classifications and event/constraint checks. The record is finalized with data hashes. A nonempty existing physical-run directory is rejected; select a new output directory rather than overwriting a baseline.
 
 For a short implementation check, `--horizon 5` changes only the post-clearing duration. This short run is not a substitute for the committed 1000 s classification. Strict integration uses `--strict`; its output tag has `_strict` appended.
 
-Solver tolerances, maximum internal step and saved intervals come from [study.toml](../studies/paper/inputs/study.toml). The adaptive internal step is not the saved output interval.
+Solver tolerances, maximum internal step and saved intervals come from [study.toml](../studies/inputs/study.toml). The adaptive internal step is not the saved output interval.
 
 ## 3. Recompute conditional sections
 
 ```bash
 # Main, frozen-electrical-state initial section.
-JULIA_NUM_THREADS=8 julia --project=. studies/paper/scripts/fault_basins.jl
+JULIA_NUM_THREADS=8 julia --project=. studies/scripts/fault_basins.jl
 # Separate local diagnostic section with rotated electrical states.
-JULIA_NUM_THREADS=8 julia --project=. studies/paper/scripts/basins.jl
+JULIA_NUM_THREADS=8 julia --project=. studies/scripts/basins.jl
 ```
 
-Outputs are `outputs/fault_basins/<case>/` and `outputs/local_basins/<case>/`. The default target roots are the verified committed physical-case roots. `--results <run-root>` selects freshly computed case roots; that directory must contain the required A/B/C runs and valid identities. `--output` selects the section output root.
+Outputs are `studies/outputs/fault_basins/<case>/` and `studies/outputs/local_basins/<case>/`. The default target roots are the verified committed physical-case roots. `--results <run-root>` selects freshly computed case roots; that directory must contain the required A/B/C runs and valid identities. `--output` selects the section output root.
 
 Only matching section checkpoints are resumed: the case row, physical input, numerical/classification settings, section input, computational source and exact target-root file must match. Missing identities or a mismatch stop the run. Changing a section creates a different initial-state experiment; do not relabel it as a zoom. See [section definitions](BASIN_VIEWS.md).
 
 The entry points integrate and save new point states/projections. Prepare plotting tables with an explicit export step, which leaves source points unchanged:
 
 ```bash
-python studies/paper/scripts/export_section_views.py --sections outputs/fault_basins --output outputs/section-views
-python studies/paper/scripts/plot.py --only basins --section-results outputs/section-views
+python studies/scripts/export_section_views.py --sections studies/outputs/fault_basins --output studies/outputs/section-views
+python studies/scripts/plot.py --only basins --section-results studies/outputs/section-views
 ```
 
-For a recalculated local section, add `--local` to the exporter, select `outputs/local_basins`, and use the plotter's `--local-results` with `--only local-basins`. `--results` selects physical-case runs and the exporter's `--roots` selects verified section-root results; defaults are the committed common-condition datasets. Input/code mismatches reject inappropriate root reuse. Plotting committed section figures needs none of these calculation/export commands.
+For a recalculated local section, add `--local` to the exporter, select `studies/outputs/local_basins`, and use the plotter's `--local-results` with `--only local-basins`. `--results` selects physical-case runs and the exporter's `--roots` selects verified section-root results; defaults are the committed common-condition datasets. Input/code mismatches reject inappropriate root reuse. Plotting committed section figures needs none of these calculation/export commands.
 
 ## 4. Numerical verification and source comparisons
 
 ```bash
 # Reference regression and full saved-waveform classification, no integration.
-julia --project=. studies/paper/scripts/check_refactor.jl
+julia --project=. studies/scripts/check_refactor.jl
 # Legacy equations, state conversion, and undamped Droop/VSM equivalence.
-julia --project=. studies/paper/scripts/check_equations.jl
+julia --project=. studies/scripts/check_equations.jl
 # Common conditions and both section definitions.
-julia --project=. studies/paper/scripts/check_conditions.jl
-julia --project=. studies/paper/scripts/check_fault_basins.jl
-julia --project=. studies/paper/scripts/check_basins.jl
+julia --project=. studies/scripts/check_conditions.jl
+julia --project=. studies/scripts/check_fault_basins.jl
+julia --project=. studies/scripts/check_basins.jl
 # Existing strict/source waveform comparisons.
-python studies/paper/scripts/validate.py
+python studies/scripts/validate.py
 # Physical-path projections and network-flow balances.
-python studies/paper/scripts/verify_basin_views.py
-python studies/paper/scripts/check_flows.py
+python studies/scripts/verify_basin_views.py
+python studies/scripts/check_flows.py
 ```
 
-Reports go to `outputs/checks/`, or a directory selected with `--output`. They do not replace the committed validation baseline. `check_refactor.jl` evaluates the archived RHS/voltage fixtures and reclassifies every saved post-fault sample of the four adopted cases. It performs no new long integration.
+Reports go to `studies/outputs/checks/`, or a directory selected with `--output`. They do not replace the committed validation baseline. `check_refactor.jl` evaluates the archived RHS/voltage fixtures and reclassifies every saved post-fault sample of the four adopted cases. It performs no new long integration.
 
 When new strict integrations are needed, use a separate output root:
 
 ```bash
-julia --project=. studies/paper/scripts/run.jl cases.csv A,B,C --strict --output outputs/strict-check
+julia --project=. studies/scripts/run.jl cases.csv A,B,C --strict --output studies/outputs/strict-check
 # Source-condition replay is a distinct validation task.
-julia --project=. studies/paper/scripts/run.jl original_cases.csv --output outputs/source-replay
+julia --project=. studies/scripts/run.jl original_cases.csv --output studies/outputs/source-replay
 ```
 
 Full source/strict tables and adopted main tables must be present together when pointing the saved-waveform validator at a different `--results` root. The original-condition inputs are migration evidence, not additional paper cases.
 
 ## 5. Optional derived-data exports
 
-`python studies/paper/scripts/power_flow.py --export --output outputs/new-flow-data` reconstructs fresh bus/line tables and balance audits from the selected saved case states. It does not run Julia. Existing export directories are rejected. This is an explicit data-export operation, separate from drawing saved flows.
+`python studies/scripts/power_flow.py --export --output studies/outputs/new-flow-data` reconstructs fresh bus/line tables and balance audits from the selected saved case states. It does not run Julia. Existing export directories are rejected. This is an explicit data-export operation, separate from drawing saved flows.
 
-`python studies/paper/scripts/compact_validation.py source.csv.gz outputs/check-view.csv.gz` selects validation columns into a new file. It never removes native states, edits reference tables or modifies the source file.
+`python studies/scripts/compact_validation.py source.csv.gz studies/outputs/check-view.csv.gz` selects validation columns into a new file. It never removes native states, edits reference tables or modifies the source file.
 
 ## Identity and provenance
 
-Committed datasets have `record.toml` pointers to [reproduction.toml](../studies/paper/provenance/reproduction.toml), which records case rows, archived input text, input/code hashes and data hashes. Original generation provenance is retained; the refactor's equivalence binding is identified separately. Presentation settings in `studies/paper/inputs/figures.toml` are separate from numerical result identities; changing colors or display ranges does not require another integration. A numerical-input/code/data hash mismatch is an error, not permission to regenerate a catalog or silently bless stale results. New runs generate their own complete records automatically. [Architecture and verification](REPRODUCIBILITY.md).
+Committed datasets have `record.toml` pointers to [reproduction.toml](../studies/provenance/reproduction.toml), which records case rows, archived input text, input/code hashes and data hashes. Original generation provenance is retained; the refactor's equivalence binding is identified separately. Presentation settings in `studies/inputs/figures.toml` are separate from numerical result identities; changing colors or display ranges does not require another integration. A numerical-input/code/data hash mismatch is an error, not permission to regenerate a catalog or silently bless stale results. New runs generate their own complete records automatically. [Architecture and verification](REPRODUCIBILITY.md).

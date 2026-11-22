@@ -1,6 +1,6 @@
 # Complete common parameter definitions
 
-Canonical inputs are [common.toml](../studies/paper/inputs/common.toml) and [cases.csv](../studies/paper/inputs/cases.csv). Only the case-level outer-control settings differ between the main cases. The quantities below use the shared model per-unit bases.
+Canonical inputs are [common.toml](../studies/inputs/common.toml) and [cases.csv](../studies/inputs/cases.csv). Only the case-level outer-control settings differ between the main cases. The quantities below use the shared model per-unit bases.
 
 ## Network
 
@@ -97,7 +97,7 @@ Each inverter contributes 13 states, in Bus1, Bus2, Bus3, Bus7 order. The CSV fi
 
 For VSM only, x53…x56 are washout z for Bus1/2/3/7, in pu frequency. `states.csv.gz` stores every differential state. The seven non-slack complex bus voltages are algebraic functions of Ig and the stage network. The slack is fixed. Section files retain the complete initial/final native vectors and all eight reconstructed complex bus voltages.
 
-The [legacy 66-state ordering](../studies/paper/provenance/legacy_states.csv) is provided only for source comparison. In legacy-coordinate VSM reference files, the old Pf slot is an auxiliary P*−ν/mp coordinate. This does not mean a P-filter state exists in the VSM integrator.
+The [legacy 66-state ordering](../studies/provenance/legacy_states.csv) is provided only for source comparison. In legacy-coordinate VSM reference files, the old Pf slot is an auxiliary P*−ν/mp coordinate. This does not mean a P-filter state exists in the VSM integrator.
 
 ## Observations
 
