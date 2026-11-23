@@ -2,8 +2,8 @@
 """Draw the implemented Droop/VSM controllers (no simulation required).
 
 Run from any directory:
-    python studies/scripts/control_diagrams.py
-    python studies/scripts/control_diagrams.py --output studies/outputs/control_diagrams
+    python docs/figures/control_diagrams.py
+    python docs/figures/control_diagrams.py --output <dir>
 
 Requires only matplotlib. Produces compact monochrome 400 dpi PNG diagrams.
 Source: src/dynamics.jl (machine and rhs!), studies/inputs/common.toml.
@@ -195,7 +195,7 @@ def overview():
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output",type=Path,
-        default=Path(__file__).resolve().parents[2]/"studies/outputs/control_diagrams")
+        default=Path(__file__).resolve().parent/"control_diagrams")
     args=parser.parse_args()
     args.output.mkdir(parents=True,exist_ok=True)
     plt.rcParams.update({"font.family":"DejaVu Serif","mathtext.fontset":"dejavuserif"})

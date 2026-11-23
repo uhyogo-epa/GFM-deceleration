@@ -2,7 +2,7 @@
 
 ![Pre-fault network and common GFM model](figures/system.png)
 
-[Vector PDF](figures/system.pdf) · [Editable vector SVG](figures/system.svg) · [Drawing code](../studies/scripts/figure1.py).
+[Vector PDF](figures/system.pdf) · [Editable vector SVG](figures/system.svg) · [Drawing code](figures/system.py).
 
 ## Network view
 
@@ -28,9 +28,9 @@ The view groups PI integrators, feedforward terms, and coordinate transformation
 After installing the Python environment, run from the repository root:
 
 ```bash
-python studies/scripts/figure1.py
+python docs/figures/system.py
 ```
 
-This explicitly updates `docs/figures/system.pdf`, `system.svg`, and `system.png`, without running Julia or modifying numerical reference data. Use `--output studies/outputs/figure1` for a separate preview. The figure is designed at approximately one IEEE column in width, with vector text in the PDF.
+This explicitly updates `docs/figures/system.pdf`, `system.svg`, and `system.png`, without running Julia or modifying numerical reference data. Use `--output <dir>` for a separate preview. The figure is designed at approximately one IEEE column in width, with vector text in the PDF.
 
 The manuscript uses a copy of the PDF as `figures/system.pdf`; keep that copy and its caption in sync when adopting a revised drawing.

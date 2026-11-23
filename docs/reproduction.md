@@ -20,7 +20,7 @@ julia +1.12.5 --project=. -e 'using Pkg; Pkg.instantiate()'
 |---|---|---|
 | Redraw time responses | `python studies/scripts/plot.py --only time` | `studies/outputs/figures/` |
 | Redraw main sections | `python studies/scripts/plot.py --only basins` | `studies/outputs/figures/` |
-| Redraw Figure 1 (network and GFM model) | `python studies/scripts/figure1.py` | `docs/figures/` |
+| Redraw Figure 1 (network and GFM model) | `python docs/figures/system.py` | `docs/figures/` |
 | Redraw saved power-flow views | `python studies/scripts/power_flow.py` | `studies/outputs/figures/` |
 | Recompute case C | `julia +1.12.5 --project=. studies/scripts/run.jl cases.csv C` | `studies/outputs/runs/C/` |
 | Recompute main sections | `julia +1.12.5 --project=. studies/scripts/fault_basins.jl` | `studies/outputs/fault_basins/` |
