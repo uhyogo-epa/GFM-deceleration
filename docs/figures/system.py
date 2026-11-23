@@ -76,7 +76,7 @@ LINE_LABELS={1:(8,13.9),2:(14.7,14.65),3:(19.5,12.4),4:(18.7,7.55),5:(14.6,3.35)
 def network(ax, cfg):
     drawn = {j: tuple(b) for j, b in enumerate(cfg['network']['branches'], 1)}
     assert drawn == TOPOLOGY, 'Update the fixed eight-bus layout for changed topology'
-    ax.set(xlim=(.1,26.5), ylim=(.7,17.4), aspect='equal'); ax.axis('off')
+    ax.set(xlim=NET_XLIM, ylim=NET_YLIM, aspect='equal'); ax.axis('off')
     for j, path in PATHS.items():
         wire(ax, path)  # All pre-fault lines are connected, including L7.
     for a,b in BARS.values():
@@ -85,16 +85,20 @@ def network(ax, cfg):
                          (2,9.7,2.5,(9.7,5.4)),(3,19.4,2.5,(19.4,5.4))]:
         end=(x+.8,y) if bus in [1,7] else (x,y+.65)
         wire(ax,[end,port]); converter(ax,x,y)
-        text(ax,x,y-1.12,f'GFM {bus}',7.5)  # numbered by bus, as in the result plots
+        # Numbered by bus, as in the result plots; the lower two are labeled
+        # beside the icon so the network needs no extra row below them.
+        if bus in [1,7]:text(ax,x,y-1.12,f'GFM {bus}',7.5)
+        elif bus==2:text(ax,x-1.05,y,f'GFM {bus}',7.5,ha='right')
+        else:text(ax,x+1.05,y,f'GFM {bus}',7.5,ha='left')
     for x in [17.8,18.4,19,19.6,20.2]:
         wire(ax,[(x,15),(x+.32,15.55)])
-    text(ax,19,16.45,'Infinite bus',7.5)
     # Each label sits at a bar end or centered above it, away from line labels.
     labels={1:(5,15.6,'center'),4:(11,15.6,'center'),6:(21.0,15,'left'),
             7:(3.8,10.5,'center'),8:(10.2,10.3,'center'),2:(7.75,5.4,'right'),
             3:(21.4,5.4,'left'),5:(22.3,10.3,'right')}
     for b,(x,y,ha) in labels.items():
-        text(ax,x,y,f'Bus {b}',7.5,ha=ha,bbox=dict(fc='white',ec='none',pad=.2),zorder=8)
+        label='Bus 6\n(Infinite bus)' if b==6 else f'Bus {b}'
+        text(ax,x,y,label,7.5,ha=ha,linespacing=1.0,bbox=dict(fc='white',ec='none',pad=.2),zorder=8)
     for j,(x,y) in LINE_LABELS.items():
         ha='left' if j==3 else 'center'
         text(ax,x,y,f'L{j}',6.8,ha=ha,bbox=dict(fc='white',ec='none',pad=.15),zorder=7)
@@ -116,10 +120,10 @@ def box(ax,x,y,w,h,label,size=7):
 
 
 def control(ax):
-    ax.set(xlim=(0,14.2),ylim=(0,6));ax.axis('off')
+    ax.set(xlim=CTR_XLIM,ylim=CTR_YLIM,aspect='equal');ax.axis('off')
     # Functional view of machine()/rhs!: no PWM or DC-source dynamics implied.
     # Signal labels sit in the gaps between blocks, never on a wire.
-    y=4.45;h=1.05
+    y=3.2;h=1.0;top=y+h/2;bottom=y-h/2
     blocks=[(1.85,3.0,'Primary control\n(Droop / VSM)'),(5.35,2.0,'Voltage\ncontrol'),
             (8.35,2.0,'Current\nlimiter'),(11.35,2.0,'Current\ncontrol')]
     for x,w,label in blocks:
@@ -128,47 +132,60 @@ def control(ax):
                                          [r'$V^*$',r'$i^*_{dq}$',r'$i^{\rm lim}_{dq}$']):
         a,b=x0+w0/2,x1-w1/2
         wire(ax,[(a,y),(b,y)],arrow=True);text(ax,(a+b)/2,y+.32,label,6.8)
-    top=y+h/2
     # References enter from above; the internal angle leaves from above.
-    wire(ax,[(1.3,5.35),(1.3,top)],arrow=True)
-    text(ax,1.3,5.72,r'$P^*,\ Q^*,\ V_{\rm set}$',6.8)
+    wire(ax,[(1.3,4.2),(1.3,top)],arrow=True)
+    text(ax,1.3,4.55,r'$P^*,\ Q^*,\ V_{\rm set}$',6.8)
     # Internal angle selects the local dq frame throughout the inner controls.
-    wire(ax,[(2.7,top),(2.7,5.35),(11.35,5.35),(11.35,top)],arrow=True)
-    text(ax,7.0,5.68,r'$\delta$',7.2)
-    box(ax,11.35,2.35,2.3,1.05,'Averaged\nconverter',6.9)
-    box(ax,7.6,2.35,2.2,.95,'LCL filter',6.9)
-    wire(ax,[(12.35,y),(13.0,y),(13.0,2.35),(12.5,2.35)],arrow=True)
-    text(ax,13.15,3.4,r'$v^*_{dq}$',6.8,ha='left')
-    wire(ax,[(10.2,2.35),(8.7,2.35)],arrow=True)
-    wire(ax,[(6.5,2.35),(4.7,2.35)],arrow=True)
-    text(ax,4.55,2.35,'Terminal bus',6.9,ha='right')
+    wire(ax,[(2.7,top),(2.7,4.2),(11.35,4.2),(11.35,top)],arrow=True)
+    text(ax,7.0,4.5,r'$\delta$',7.2)
+    # Lower row, right to left: converter -> LCL filter -> power measurement.
+    yl=1.0
+    box(ax,11.35,yl,2.3,.95,'Averaged\nconverter',6.9)
+    box(ax,7.0,yl,2.2,.95,'LCL filter',6.9)
+    box(ax,1.85,yl,2.6,.95,'Power\nmeasurement',6.9)
+    wire(ax,[(12.35,y),(13.0,y),(13.0,yl),(12.5,yl)],arrow=True)
+    text(ax,13.15,2.1,r'$v^*_{dq}$',6.8,ha='left')
+    wire(ax,[(10.2,yl),(8.1,yl)],arrow=True)
+    wire(ax,[(5.9,yl),(3.15,yl)],arrow=True)
+    text(ax,4.5,yl+.3,r'$V_C,\ I_g$',6.8)
+    wire(ax,[(1.85,yl+.475),(1.85,bottom)],arrow=True)
+    text(ax,2.0,2.1,r'$P,\ Q$',6.8,ha='left')
+    wire(ax,[(7.0,yl-.475),(7.0,-.15)],arrow=True)
+    text(ax,7.2,-.02,'Terminal bus',6.9,ha='left')
     # Electrical measurements enter the inner-control subsystem, not the limiter.
-    wire(ax,[(7.6,2.825),(7.6,3.3),(5.35,3.3),(5.35,y-h/2)],arrow=True)
-    wire(ax,[(11.35,3.3),(11.35,y-h/2)],arrow=True)
-    wire(ax,[(7.6,3.3),(11.35,3.3)])
-    text(ax,9.45,3.6,r'$v_C,\ i_f,\ i_g$',6.8)
-    box(ax,3.1,.85,3.0,1.05,'Power\nmeasurement',6.9)
-    wire(ax,[(7.6,1.875),(7.6,.85),(4.6,.85)],arrow=True)
-    text(ax,6.1,1.15,r'$V_C,\ I_g$',6.8)
-    wire(ax,[(1.6,.85),(.2,.85),(.2,3.3),(1.85,3.3),(1.85,y-h/2)],arrow=True)
-    text(ax,.38,2.05,r'$P,\ Q$',6.8,ha='left')
+    ym=2.1
+    wire(ax,[(7.0,yl+.475),(7.0,ym),(5.35,ym),(5.35,bottom)],arrow=True)
+    wire(ax,[(11.35,ym),(11.35,bottom)],arrow=True)
+    wire(ax,[(7.0,ym),(11.35,ym)])
+    text(ax,9.2,ym+.3,r'$v_C,\ i_f,\ i_g$',6.8)
+
+
+NET_XLIM,NET_YLIM=(.1,26.5),(1.7,16.1)
+CTR_XLIM,CTR_YLIM=(0,14.2),(-.3,4.85)
 
 
 def draw():
     cfg=tomllib.loads((ROOT/'studies/inputs/study.toml').read_text())
     plt.rcParams.update({'font.family':'STIXGeneral','mathtext.fontset':'stix',
                          'pdf.fonttype':42,'svg.fonttype':'none'})
-    fig=plt.figure(figsize=(3.5,4.25),facecolor='white')
-    net=fig.add_axes([.005,.405,.99,.59]);network(net,cfg)
-    ctr=fig.add_axes([.035,.005,.94,.30]);control(ctr)
+    W=3.5
+    span=lambda lim:lim[1]-lim[0]
+    # Panel heights follow from equal aspect at the panel widths (inches).
+    net_w=.99*W;net_h=net_w*span(NET_YLIM)/span(NET_XLIM)
+    ctr_w=.94*W;ctr_h=ctr_w*span(CTR_YLIM)/span(CTR_XLIM)
+    frame_y0=.01;ctr_y0=.03;frame_top=ctr_y0+ctr_h+.06;net_y0=frame_top+.14
+    H=net_y0+net_h+.01
+    fig=plt.figure(figsize=(W,H),facecolor='white')
+    net=fig.add_axes([.005,net_y0/H,.99,net_h/H]);network(net,cfg)
+    ctr=fig.add_axes([.035,ctr_y0/H,.94,ctr_h/H]);control(ctr)
     # The lower Bus 2 GFM expands into the model view, rather than a new device.
-    frame=Rectangle((.025,.008),.95,.35,transform=fig.transFigure,
-                    fc='none',ec='#666666',lw=.65,linestyle=(0,(3,2)))
-    fig.add_artist(frame)
-    for start,end in [((8.9,1.85),(.025,.358)),((10.5,1.85),(.975,.358))]:
+    y0,y1=frame_y0/H,frame_top/H
+    fig.add_artist(Rectangle((.025,y0),.95,y1-y0,transform=fig.transFigure,
+                             fc='none',ec='#666666',lw=.65,linestyle=(0,(3,2))))
+    for start,end in [((8.9,1.85),(.025,y1)),((10.5,1.85),(.975,y1))]:
         fig.add_artist(ConnectionPatch(start,end,coordsA=net.transData,coordsB=fig.transFigure,
                                       color='#777777',lw=.6,linestyle=(0,(3,2))))
-    fig.text(.08,.345,'GFM model',fontsize=7.4,
+    fig.text(.08,y1,'GFM model',fontsize=7.4,va='center',
              bbox=dict(fc='white',ec='none',pad=1))
     return fig
 
