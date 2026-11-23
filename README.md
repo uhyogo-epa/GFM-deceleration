@@ -6,6 +6,12 @@ A common eight-bus model compares fault recovery and negative internal-angle rot
 
 This repository is being aligned with the manuscript. The existing calculations and saved results are retained; the model explanation and manuscript-to-code correspondence are being organized. The documentation identifies the current scope and remaining verification.
 
+## System and GFM model
+
+![Pre-fault eight-bus network and GFM model](docs/figures/system.png)
+
+All lines are connected in the pre-fault network. The lightning marker identifies the fault location at Bus 4; the fault is applied at 1.00 s and cleared at 1.15 s, when L7 (4–5) opens. The lower callout shows the common GFM control and electrical model. [Figure explanation and redraw command](docs/figure1.md).
+
 ## Start here
 
 - [Model and assumptions](docs/model.md): what is simulated and where the equations are implemented.

@@ -10,7 +10,7 @@ These figures are retained for repository inspection; the paper candidates are i
 | Conditional section A | [Point states, labels, paths](../studies/results/fault_basins/A/) | [PDF](../studies/figures/paper/basin_A.pdf) | `python studies/scripts/plot.py --only basins` |
 | Conditional section B | [Point states, labels, paths](../studies/results/fault_basins/B/) | [PDF](../studies/figures/paper/basin_B.pdf) | same |
 | Conditional section C | [Point states, labels, paths](../studies/results/fault_basins/C/) | [PDF](../studies/figures/paper/basin_C.pdf) | same |
-| System/scenario diagram | [Shared post-fault network](../studies/results/power_flow/common_post_equilibrium/) | [PDF](../studies/figures/paper/system.pdf) | `python studies/scripts/power_flow.py` |
+| Pre-fault system and common GFM model (Fig. 1) | [Inputs](../studies/inputs/common.toml), [figure guide](figure1.md) | [PDF](figures/system.pdf) | `python studies/scripts/figure1.py` |
 
 Inputs are [case rows](../studies/inputs/cases.csv), [physical values](../studies/inputs/common.toml), [main section](../studies/inputs/fault_basin.toml), [local section](../studies/inputs/local_basin.toml) and [presentation](../studies/inputs/figures.toml). [Saved figure identities](../studies/figures/catalog.toml) link every figure to its data. These commands draw into `studies/outputs/figures/` and do not rewrite numeric results or validation baselines. [Full workflow guide](RUNNING.md).
 
