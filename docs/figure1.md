@@ -6,9 +6,9 @@
 
 ## Network view
 
-The diagram shows the pre-fault network: all eleven lines, including L7, are connected. Each of the four GFMs is represented by a rectangular DC/AC converter icon. This icon identifies an inverter-based resource; it does not introduce DC-source or PWM dynamics into the averaged simulation model. Bus 6 remains the fixed infinite-grid/slack boundary.
+The diagram shows the pre-fault network: all eleven lines, including L7, are connected. Each of the four GFMs is represented by a rectangular DC/AC converter icon. This icon identifies an inverter-based resource; it does not introduce DC-source or PWM dynamics into the averaged simulation model. Bus 6 remains the fixed infinite-bus/slack boundary.
 
-The lightning marker at Bus 4 indicates the location of the consuming shunt fault. It is a location annotation, rather than a drawn circuit branch or a claim of lightning as the physical fault cause. There is no grounded fault branch or line-switch symbol. The actual contingency remains unchanged: the fault is applied at 1.00 s and removed at 1.15 s, when L7 (4–5) opens. The capacitor's ground symbol remains part of the pre-fault circuit.
+The lightning marker is drawn on L7 immediately next to Bus 4, indicating a fault at its Bus 4 terminal. The present numerical implementation applies the consuming shunt at the Bus 4 node: this is a terminal (zero-distance) fault representation, with no added line segment or interior fault node. It is a location annotation, rather than a drawn circuit branch or a claim of lightning as the physical fault cause. There is no grounded fault branch or line-switch symbol. The actual contingency remains unchanged: the fault is applied at 1.00 s and removed at 1.15 s, when L7 (4–5) opens. The capacitor's ground symbol remains part of the pre-fault circuit.
 
 Lightning fault annotations and rectangular DC/AC converter icons appear in [EPRI's GFM tutorial](https://restservice.epri.com/publicdownload/000000003002021722/0/Product) and [NERC-hosted inverter presentations](https://www.nerc.com/globalassets/who-we-are/standing-committees/rstc/irps/20260226_irps_presentations.pdf). The present drawing is generated from this repository's own layout and model.
 

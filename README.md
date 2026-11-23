@@ -10,7 +10,7 @@ This repository is being aligned with the manuscript. The existing calculations 
 
 ![Pre-fault eight-bus network and GFM model](docs/figures/system.png)
 
-All lines are connected in the pre-fault network. The lightning marker identifies the fault location at Bus 4; the fault is applied at 1.00 s and cleared at 1.15 s, when L7 (4–5) opens. The lower callout shows the common GFM control and electrical model. [Figure explanation and redraw command](docs/figure1.md).
+All lines are connected in the pre-fault network. The lightning marker identifies the fault location at the Bus 4 end of L7; the fault is applied at 1.00 s and cleared at 1.15 s, when L7 (4–5) opens. The lower callout shows the common GFM control and electrical model. [Figure explanation and redraw command](docs/figure1.md).
 
 ## Start here
 

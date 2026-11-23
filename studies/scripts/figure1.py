@@ -30,7 +30,8 @@ def wire(ax, points, arrow=False, **kw):
         if len(points) > 2:
             polyline(ax, points[:-1], color=INK, lw=.7, **kw)
         ax.add_patch(FancyArrowPatch(points[-2], points[-1], arrowstyle='-|>',
-                                    mutation_scale=6, color=INK, lw=.7, **kw))
+                                    mutation_scale=6, color=INK, lw=.7,
+                                    shrinkA=0, shrinkB=0, zorder=6, **kw))
     else:
         polyline(ax, points, color=INK, lw=.8, **kw)
 
@@ -62,24 +63,27 @@ def network(ax, cfg):
         text(ax,x,y-1.12,'GFM',7.5)
     for x in [17.8,18.4,19,19.6,20.2]:
         wire(ax,[(x,15),(x+.32,15.55)])
-    text(ax,19,16.45,'Infinite grid',7.5)
+    text(ax,19,16.45,'Infinite bus',7.5)
     labels={1:(5,15.6),4:(11,15.6),6:(23,15),7:(3.8,10.55),8:(9.6,10.4),
-            2:(6.5,5.4),3:(23.1,5.4),5:(24.1,9.5)}
+            2:(6.5,5.4),3:(23.1,4.5),5:(23.2,10.5)}
     for b,(x,y) in labels.items():
         text(ax,x,y,f'Bus {b}',7.5,bbox=dict(fc='white',ec='none',pad=.2),zorder=8)
     for j,(x,y) in LINE_LABELS.items():
         if j==7:y=11.4
+        if j==4:x,y=20.25,7.6
         text(ax,x,y,f'L{j}',6.8,bbox=dict(fc='white',ec='none',pad=.15),zorder=7)
-    wire(ax,[(20.6,9.5),(20.6,10.9),(22.8,10.9)],arrow=True)
-    text(ax,23.2,11.2,'Load',7.2,ha='left')
-    wire(ax,[(20.9,9.5),(22.2,9.5),(22.2,8.1)])
-    for y in [8.1,7.85]:wire(ax,[(21.83,y),(22.57,y)])
-    wire(ax,[(22.2,7.85),(22.2,7.15)]);ground(ax,22.2,7.15)
-    text(ax,23,7.8,'Shunt\ncapacitor',7.0,ha='left')
+    # Parallel load/capacitor branches share a straight Bus 5 extension.
+    wire(ax,[(21,9.5),(24.8,9.5)])
+    wire(ax,[(21.2,9.5),(21.2,7.1)],arrow=True)
+    text(ax,21.2,6.45,'Load',7.2,va='top')
+    wire(ax,[(24.8,9.5),(24.8,8.2)])
+    for y in [8.2,7.95]:wire(ax,[(24.38,y),(25.22,y)])
+    wire(ax,[(24.8,7.95),(24.8,7.1)]);ground(ax,24.8,7.1)
+    text(ax,24.8,6.45,'Capacitor',7.0,va='top')
     # A location annotation, not a grounded circuit branch or physical lightning model.
-    bolt=[(11.8,10.3),(11.35,10.9),(11.65,10.9),(11.0,11.7),(11.2,11.1),(10.95,11.1)]
+    bolt=[(12.1,13.5),(11.65,12.85),(12.0,12.9),(11.35,12.2),(11.55,12.75),(11.2,12.7)]
     ax.add_patch(Polygon(bolt,closed=True,fc=INK,ec=INK,lw=.4,zorder=9))
-    text(ax,13.2,10.45,'Fault',7.0,ha='left')
+    text(ax,13.0,13.0,'Fault',7.0,ha='left')
 
 
 def box(ax,x,y,w,h,label,size=7):
@@ -96,7 +100,7 @@ def control(ax):
         box(ax,x,y,2.8 if x==2 else 2.5,1.05,label,6.2 if x==2 else 6.9)
     for a,b,label in [(3.4,3.95,r'$V^*$'),(6.45,7.15,r'$i^*_{dq}$'),(9.65,10.35,r'$i^{\rm lim}_{dq}$')]:
         wire(ax,[(a,y),(b,y)],arrow=True);text(ax,(a+b)/2,y+.65,label,6.8)
-    wire(ax,[(.1,y),(.75,y)],arrow=True)
+    wire(ax,[(.1,y),(.6,y)],arrow=True)
     text(ax,1.6,5.8,r'$P^*,\ Q^*,\ V_{\rm set}$',6.5)
     # Internal angle selects the local dq frame throughout the inner controls.
     wire(ax,[(2,4.975),(2,5.5),(11.6,5.5),(11.6,4.975)],arrow=True)
@@ -134,8 +138,7 @@ def draw():
     for start,end in [((8.9,1.85),(.025,.358)),((10.5,1.85),(.975,.358))]:
         fig.add_artist(ConnectionPatch(start,end,coordsA=net.transData,coordsB=fig.transFigure,
                                       color='#777777',lw=.6,linestyle=(0,(3,2))))
-    fig.text(.025,.99,'(a) Pre-fault network',fontsize=7.6)
-    fig.text(.045,.345,'(b) GFM model (common to all four units)',fontsize=7.4,
+    fig.text(.045,.345,'GFM model (common to all four units)',fontsize=7.4,
              bbox=dict(fc='white',ec='none',pad=1))
     return fig
 
@@ -148,6 +151,8 @@ def main():
     for ext in ['pdf','svg','png']:
         path=args.output/f'system.{ext}'
         fig.savefig(path,dpi=350,facecolor='white',bbox_inches='tight',pad_inches=.025)
+        if ext == 'svg':
+            path.write_text('\n'.join(line.rstrip() for line in path.read_text().splitlines()) + '\n')
         print(path)
     plt.close(fig)
 
