@@ -18,10 +18,11 @@ The dashed callout expands the lower GFM at Bus 2 into the common model used by 
 
 - Primary control uses Droop or VSM and the shared Q–V path to provide voltage and internal-angle references.
 - Voltage control generates a dq current command; the circular limiter acts on that command before the current controller.
-- The current controller drives the averaged converter, which supplies the LCL filter and terminal bus.
-- The internal angle defines the local dq frame. Electrical measurements feed the inner controls; capacitor voltage and grid-side filter current give `P + jQ = Vc conj(Ig)` for the primary-control feedback.
+- The current controller's voltage command `v*_dq` drives the LCL filter. The averaged converter applies this command directly as the inverter-side filter voltage (no converter states, PWM or DC side), so it has no block of its own.
+- The LCL filter injects its grid-side current `Ig` into the network, and the algebraic network solution returns the terminal-bus voltage `VT` (`voltage()` in [network.jl](../src/network.jl)): current out, voltage in.
+- The internal angle defines the local dq frame. Measured signals are those used in `machine()` of [dynamics.jl](../src/dynamics.jl): the current controller uses `If` (error) and `VC` (feedforward); the voltage controller uses `VC` (error) and `Ig` (feedforward and virtual impedance, currently zero). Power calculation is the algebraic `P + jQ = VC conj(Ig)`; the power filters belong to the primary control.
 
-The view groups PI integrators, feedforward terms, and coordinate transformations into functional blocks; it adds no simulated states. Lowercase dq signals refer to the local control frame; uppercase `Vc` and `Ig` denote the complex electrical measurements used for power. Exact equations are in [dynamics.jl](../src/dynamics.jl), with conventions and scope in the [model guide](model.md).
+The view groups PI integrators, feedforward terms, and coordinate transformations into functional blocks; it adds no simulated states. Measured quantities are uppercase, as in the manuscript; lowercase dq signals are commands in the local control frame. Exact equations are in [dynamics.jl](../src/dynamics.jl), with conventions and scope in the [model guide](model.md).
 
 ## Redraw
 

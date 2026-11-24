@@ -122,10 +122,12 @@ def box(ax,x,y,w,h,label,size=7):
 def control(ax):
     ax.set(xlim=CTR_XLIM,ylim=CTR_YLIM,aspect='equal');ax.axis('off')
     # Functional view of machine()/rhs!: no PWM or DC-source dynamics implied.
-    # Signal labels sit in the gaps between blocks, never on a wire.
+    # The averaged converter applies v*_dq directly to the LCL filter, so it
+    # has no block of its own. Signal labels never sit on a wire.
     y=3.2;h=1.0;top=y+h/2;bottom=y-h/2
-    blocks=[(1.85,3.0,'Primary control\n(Droop / VSM)'),(5.35,2.0,'Voltage\ncontrol'),
-            (8.35,2.0,'Current\nlimiter'),(11.35,2.0,'Current\ncontrol')]
+    xp,xv,xl,xc=1.85,5.3,8.25,11.2   # primary, voltage, limiter, current control
+    blocks=[(xp,3.0,'Primary control\n(Droop / VSM)'),(xv,2.0,'Voltage\ncontrol'),
+            (xl,2.0,'Current\nlimiter'),(xc,2.0,'Current\ncontrol')]
     for x,w,label in blocks:
         box(ax,x,y,w,h,label,6.9)
     for (x0,w0,_),(x1,w1,_),label in zip(blocks,blocks[1:],
@@ -133,35 +135,41 @@ def control(ax):
         a,b=x0+w0/2,x1-w1/2
         wire(ax,[(a,y),(b,y)],arrow=True);text(ax,(a+b)/2,y+.32,label,6.8)
     # References enter from above; the internal angle leaves from above.
-    wire(ax,[(1.3,4.2),(1.3,top)],arrow=True)
-    text(ax,1.3,4.55,r'$P^*,\ Q^*,\ V_{\rm set}$',6.8)
+    yt=4.2
+    wire(ax,[(1.3,yt),(1.3,top)],arrow=True)
+    text(ax,1.3,yt+.35,r'$P^*,\ Q^*,\ V_{\rm set}$',6.8)
     # Internal angle selects the local dq frame throughout the inner controls.
-    wire(ax,[(2.7,top),(2.7,4.2),(11.35,4.2),(11.35,top)],arrow=True)
-    text(ax,7.0,4.5,r'$\delta$',7.2)
-    # Lower row, right to left: converter -> LCL filter -> power measurement.
-    yl=1.0
-    box(ax,11.35,yl,2.3,.95,'Averaged\nconverter',6.9)
-    box(ax,7.0,yl,2.2,.95,'LCL filter',6.9)
-    box(ax,1.85,yl,2.6,.95,'Power\nmeasurement',6.9)
-    wire(ax,[(12.35,y),(13.0,y),(13.0,yl),(12.5,yl)],arrow=True)
-    text(ax,13.15,2.1,r'$v^*_{dq}$',6.8,ha='left')
-    wire(ax,[(10.2,yl),(8.1,yl)],arrow=True)
-    wire(ax,[(5.9,yl),(3.15,yl)],arrow=True)
-    text(ax,4.5,yl+.3,r'$V_C,\ I_g$',6.8)
-    wire(ax,[(1.85,yl+.475),(1.85,bottom)],arrow=True)
-    text(ax,2.0,2.1,r'$P,\ Q$',6.8,ha='left')
-    wire(ax,[(7.0,yl-.475),(7.0,-.15)],arrow=True)
-    text(ax,7.2,-.02,'Terminal bus',6.9,ha='left')
-    # Electrical measurements enter the inner-control subsystem, not the limiter.
-    ym=2.1
-    wire(ax,[(7.0,yl+.475),(7.0,ym),(5.35,ym),(5.35,bottom)],arrow=True)
-    wire(ax,[(11.35,ym),(11.35,bottom)],arrow=True)
-    wire(ax,[(7.0,ym),(11.35,ym)])
-    text(ax,9.2,ym+.3,r'$v_C,\ i_f,\ i_g$',6.8)
+    wire(ax,[(2.7,top),(2.7,yt),(xc,yt),(xc,top)],arrow=True)
+    text(ax,(2.7+xc)/2,yt+.3,r'$\delta$',7.2)
+    # Lower row: power calculation <- measurements <- LCL filter <-> network.
+    # The LCL filter sits exactly below the current controller (same edges).
+    yl=1.0;hl=.95;lw=2.0;right=xc+lw/2
+    box(ax,xc,yl,lw,hl,'LCL filter',6.9)
+    box(ax,xp,yl,2.6,hl,'Power\ncalculation',6.9)
+    wire(ax,[(xc+.6,bottom),(xc+.6,yl+hl/2)],arrow=True)
+    text(ax,xc+.75,(bottom+yl+hl/2)/2,r'$v^*_{dq}$',6.8,ha='left')
+    # Network interface: the grid-side filter current is injected, and the
+    # network solution returns the terminal-bus voltage (voltage() in network.jl).
+    wire(ax,[(right,yl+.24),(right+.9,yl+.24)],arrow=True)
+    wire(ax,[(right+.9,yl-.24),(right,yl-.24)],arrow=True)
+    text(ax,right+.45,yl+.55,r'$I_{\rm g}$',6.8)
+    text(ax,right+.45,yl-.57,r'$V_{\rm T}$',6.8)
+    text(ax,right+1.02,yl,'Network',6.9,ha='left')
+    # Measurements as used in machine(): current control takes I_f (error) and
+    # V_C (feedforward); voltage control takes V_C (error) and I_g (feedforward).
+    # Measured quantities are uppercase as in the manuscript; dq commands lowercase.
+    wire(ax,[(xc-.6,yl+hl/2),(xc-.6,bottom)],arrow=True)
+    text(ax,xc-.75,(bottom+yl+hl/2)/2,r'$I_{\rm f},\ V_{\rm C}$',6.8,ha='right')
+    wire(ax,[(xc-lw/2,yl),(xp+1.3,yl)],arrow=True)
+    wire(ax,[(xv,yl),(xv,bottom)],arrow=True)
+    # One label: voltage control and power calculation receive the same signals.
+    text(ax,(xv+xc-lw/2)/2,yl+.3,r'$V_{\rm C},\ I_{\rm g}$',6.8)
+    wire(ax,[(xp,yl+hl/2),(xp,bottom)],arrow=True)
+    text(ax,xp+.15,(bottom+yl+hl/2)/2,r'$P,\ Q$',6.8,ha='left')
 
 
 NET_XLIM,NET_YLIM=(.1,26.5),(1.7,16.1)
-CTR_XLIM,CTR_YLIM=(0,14.2),(-.3,4.85)
+CTR_XLIM,CTR_YLIM=(0,14.85),(.18,4.85)
 
 
 def draw():
@@ -172,12 +180,12 @@ def draw():
     span=lambda lim:lim[1]-lim[0]
     # Panel heights follow from equal aspect at the panel widths (inches).
     net_w=.99*W;net_h=net_w*span(NET_YLIM)/span(NET_XLIM)
-    ctr_w=.94*W;ctr_h=ctr_w*span(CTR_YLIM)/span(CTR_XLIM)
+    ctr_w=.925*W;ctr_h=ctr_w*span(CTR_YLIM)/span(CTR_XLIM)
     frame_y0=.01;ctr_y0=.03;frame_top=ctr_y0+ctr_h+.06;net_y0=frame_top+.14
     H=net_y0+net_h+.01
     fig=plt.figure(figsize=(W,H),facecolor='white')
     net=fig.add_axes([.005,net_y0/H,.99,net_h/H]);network(net,cfg)
-    ctr=fig.add_axes([.035,ctr_y0/H,.94,ctr_h/H]);control(ctr)
+    ctr=fig.add_axes([.035,ctr_y0/H,.925,ctr_h/H]);control(ctr)
     # The lower Bus 2 GFM expands into the model view, rather than a new device.
     y0,y1=frame_y0/H,frame_top/H
     fig.add_artist(Rectangle((.025,y0),.95,y1-y0,transform=fig.transFigure,
